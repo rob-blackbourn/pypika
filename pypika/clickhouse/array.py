@@ -1,5 +1,7 @@
 import abc
+from typing import Any, List, Mapping, Optional, Union
 
+from pypika.enums import Dialects
 from pypika.terms import (
     Field,
     Function,
@@ -9,15 +11,20 @@ from pypika.utils import format_alias_sql
 
 
 class Array(Term):
+
     def __init__(
-          self, values: list, converter_cls=None, converter_options: dict = None, alias: str = None
+            self,
+            values: List[Any],
+            converter_cls=None,
+            converter_options: Optional[Mapping[str, Any]] = None,
+            alias: Optional[str] = None
     ):
         super().__init__(alias)
         self._values = values
         self._converter_cls = converter_cls
         self._converter_options = converter_options or dict()
 
-    def get_sql(self):
+    def get_sql(self) -> str:
         if self._converter_cls:
             converted = []
             for value in self._values:
@@ -33,27 +40,27 @@ class Array(Term):
 
 class HasAny(Function):
     def __init__(
-          self,
-          left_array: Array or Field,
-          right_array: Array or Field,
-          alias: str = None,
-          schema: str = None,
+            self,
+            left_array: Union[Array, Field],
+            right_array: Union[Array, Field],
+            alias: Optional[str] = None,
+            schema: Optional[str] = None,
     ):
         self._left_array = left_array
         self._right_array = right_array
         self.alias = alias
         self.schema = schema
-        self.args = ()
+        self.args = []
         self.name = "hasAny"
 
     def get_sql(
-          self,
-          with_alias=False,
-          with_namespace=False,
-          quote_char=None,
-          dialect=None,
-          **kwargs
-    ):
+            self,
+            with_alias: bool = False,
+            with_namespace: bool = False,
+            quote_char: Optional[str] = None,
+            dialect: Optional[Dialects] = None,
+            **kwargs: Any
+    ) -> str:
         left = self._left_array.get_sql()
         right = self._right_array.get_sql()
         sql = "{name}({left},{right})".format(
@@ -65,19 +72,25 @@ class HasAny(Function):
 
 
 class _AbstractArrayFunction(Function, metaclass=abc.ABCMeta):
-    def __init__(self, array: Array or Field, alias: str = None, schema: str = None):
+
+    def __init__(
+            self,
+            array: Union[Array, Field],
+            alias: Optional[str] = None,
+            schema: Optional[str] = None
+    ):
         self.schema = schema
         self.alias = alias
         self.name = self.clickhouse_function()
         self._array = array
 
     def get_sql(
-          self,
-          with_namespace=False,
-          quote_char=None,
-          dialect=None,
-          **kwargs
-    ):
+            self,
+            with_namespace: bool = False,
+            quote_char: Optional[str] = None,
+            dialect: Optional[Dialects] = None,
+            **kwargs: Any
+    ) -> str:
         array = self._array.get_sql()
         sql = "{name}({array})".format(
               name=self.name,

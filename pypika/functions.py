@@ -7,7 +7,7 @@ from pypika.terms import (
     Function,
     Star,
 )
-from pypika.utils import builder
+from pypika.utils import copy_if_immutable
 
 __author__ = "Timothy Heys"
 __email__ = "theys@kayak.com"
@@ -27,9 +27,10 @@ class DistinctOptionFunction(AggregateFunction):
             return s[:n] + "DISTINCT " + s[n:]
         return s
 
-    @builder
     def distinct(self):
-        self._distinct = True
+        with copy_if_immutable(self) as this:
+            this._distinct = True
+            return this
 
 
 class Count(DistinctOptionFunction):

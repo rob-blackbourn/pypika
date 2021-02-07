@@ -1,0 +1,27 @@
+{
+    "python.pythonPath": ".venv/bin/python",
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintEnabled": true,
+    "python.linting.mypyEnabled": true,
+    "[python]": {
+        "gitlens.codeLens.symbolScopes": [
+            "!Module"
+        ],
+        "editor.wordBasedSuggestions": false,
+        "editor.rulers": [80],
+        "editor.formatOnSave": true
+    },
+    "cSpell.words": [
+        "pypika"
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./pypika",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true
+}

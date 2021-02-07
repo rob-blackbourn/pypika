@@ -1,7 +1,11 @@
-from typing import Optional, List, Any, Type, Callable
+import copy
+from types import TracebackType
+from typing import Any, Callable, Generic, List, Optional, Type, TypeVar
 
 __author__ = "Timothy Heys"
 __email__ = "theys@kayak.com"
+
+T = TypeVar('T')
 
 
 class QueryException(Exception):
@@ -36,27 +40,20 @@ class FunctionException(Exception):
     pass
 
 
-def builder(func: Callable) -> Callable:
-    """
-    Decorator for wrapper "builder" functions.  These are functions on the Query class or other classes used for
-    building queries which mutate the query and return self.  To make the build functions immutable, this decorator is
-    used which will deepcopy the current instance.  This decorator will return the return value of the inner function
-    or the new copy of the instance.  The inner function does not need to return self.
-    """
-    import copy
+def copy_immutable(obj: T) -> T:
+    return copy.copy(obj) if getattr(obj, "immutable", True) else obj
 
-    def _copy(self, *args, **kwargs):
-        self_copy = copy.copy(self) if getattr(self, "immutable", True) else self
-        result = func(self_copy, *args, **kwargs)
 
-        # Return self if the inner function returns None.  This way the inner function can return something
-        # different (for example when creating joins, a different builder is returned).
-        if result is None:
-            return self_copy
+class copy_if_immutable(Generic[T]):
 
-        return result
+    def __init__(self, obj: T) -> None:
+        self.obj = copy.copy(obj) if getattr(obj, "immutable", True) else obj
 
-    return _copy
+    def __enter__(self) -> T:
+        return self.obj
+
+    def __exit__(self, exc_type: Type[BaseException], exc_value: BaseException, traceback: TracebackType):
+        pass
 
 
 def ignore_copy(func: Callable) -> Callable:
@@ -78,7 +75,7 @@ def ignore_copy(func: Callable) -> Callable:
             "__getnewargs__",
         ]:
             raise AttributeError(
-                  "'%s' object has no attribute '%s'" % (self.__class__.__name__, name)
+                "'%s' object has no attribute '%s'" % (self.__class__.__name__, name)
             )
 
         return func(self, name)
@@ -109,9 +106,9 @@ def format_alias_sql(sql: str, alias: Optional[str], quote_char: Optional[str] =
     if alias is None:
         return sql
     return "{sql}{_as}{alias}".format(
-          sql=sql,
-          _as=' AS ' if as_keyword else ' ',
-          alias=format_quotes(alias, alias_quote_char or quote_char)
+        sql=sql,
+        _as=' AS ' if as_keyword else ' ',
+        alias=format_quotes(alias, alias_quote_char or quote_char)
     )
 
 

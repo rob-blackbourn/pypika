@@ -38,23 +38,14 @@ from pypika.utils import (
     copy_if_immutable
 )
 
+from .node import Node, NodeT
 if TYPE_CHECKING:
-    from pypika.queries import Table, QueryBuilder, Selectable
+    from .selectable import Selectable
+    from pypika.queries import Table, QueryBuilder
 
 
 __author__ = "Timothy Heys"
 __email__ = "theys@kayak.com"
-
-
-NodeT = TypeVar("NodeT", bound="Node", covariant=True)
-
-
-class Node(Generic[NodeT]):
-    def nodes_(self) -> Iterator["Node"]:
-        yield self
-
-    def find_(self, type: Type[NodeT]) -> List[NodeT]:
-        return [node for node in self.nodes_() if isinstance(node, type)]
 
 
 class Term(Node):

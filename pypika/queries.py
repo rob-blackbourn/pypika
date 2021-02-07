@@ -10,6 +10,7 @@ from typing import (
     Tuple as TypedTuple,
 )
 
+from .aliased_query import AliasedQuery
 from pypika.enums import JoinType, SetOperation, Dialects
 from .node import Node
 from .selectable import Selectable
@@ -39,24 +40,6 @@ from pypika.utils import (
 
 __author__ = "Timothy Heys"
 __email__ = "theys@kayak.com"
-
-
-class AliasedQuery(Selectable):
-    def __init__(self, name: str, query: Optional[Selectable] = None) -> None:
-        super().__init__(alias=name)
-        self.name = name
-        self.query = query
-
-    def get_sql(self, **kwargs: Any) -> str:
-        if self.query is None:
-            return self.name
-        return self.query.get_sql(**kwargs)
-
-    def __eq__(self, other: "AliasedQuery") -> bool:
-        return isinstance(other, AliasedQuery) and self.name == other.name
-
-    def __hash__(self) -> int:
-        return hash(str(self.name))
 
 
 class Schema:

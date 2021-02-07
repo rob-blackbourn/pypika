@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from .node import Node
 from .terms import Field, Star
 from .utils import copy_if_immutable, ignore_copy
@@ -7,7 +9,7 @@ from .utils import copy_if_immutable, ignore_copy
 
 class Selectable(Node):
 
-    def __init__(self, alias: str) -> None:
+    def __init__(self, alias: Optional[str]) -> None:
         self.alias = alias
 
     def as_(self, alias: str) -> Selectable:
@@ -30,5 +32,5 @@ class Selectable(Node):
     def __getitem__(self, name: str) -> Field:
         return self.field(name)
 
-    def get_table_name(self) -> str:
+    def get_table_name(self) -> Optional[str]:
         return self.alias

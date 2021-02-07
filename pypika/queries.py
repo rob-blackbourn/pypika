@@ -47,14 +47,14 @@ class Schema:
         self._name = name
         self._parent = parent
 
-    def __eq__(self, other: "Schema") -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Schema)
             and self._name == other._name
             and self._parent == other._parent
         )
 
-    def __ne__(self, other: "Schema") -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     @ignore_copy
@@ -588,33 +588,32 @@ class QueryBuilder(Selectable, Term):
     ):
         super().__init__(None)
 
-        self._from = []
-        self._insert_table = None
-        self._update_table = None
-        self._delete_from = False
-        self._replace = False
+        self._from: List[Selectable] = []
+        self._insert_table: Optional[Table] = None
+        self._update_table: Optional[Table] = None
+        self._delete_from: bool = False
+        self._replace: bool = False
 
-        self._with = []
-        self._selects = []
-        self._force_indexes = []
-        self._use_indexes = []
-        self._columns = []
-        self._values = []
-        self._distinct = False
-        self._ignore = False
-        self._for_update = False
+        self._with: List[Term] = []
+        self._selects: List[Term] = []
+        self._force_indexes: List[Index] = []
+        self._use_indexes: List[Index] = []
+        self._columns: List[Column] = []
+        self._values: List[Term] = []
+        self._distinct: bool = False
+        self._ignore: bool = False
+        self._for_update: bool = False
 
-        self._wheres = None
-        self._prewheres = None
-        self._groupbys = []
-        self._with_totals = False
-        self._havings = None
-        self._orderbys = []
-        self._joins = []
-        self._unions = []
+        self._wheres: Optional[Criterion] = None
+        self._prewheres: Optional[Term] = None
+        self._groupbys: List[Field] = []
+        self._with_totals: bool = False
+        self._havings: Optional[Criterion] = None
+        self._orderbys: List[Term] = []
+        self._joins: List[Selectable] = []
 
-        self._limit = None
-        self._offset = None
+        self._limit: Optional[int] = None
+        self._offset: Optional[int] = None
 
         self._updates = []
 
@@ -646,7 +645,6 @@ class QueryBuilder(Selectable, Term):
         newone._groupbys = copy(self._groupbys)
         newone._orderbys = copy(self._orderbys)
         newone._joins = copy(self._joins)
-        newone._unions = copy(self._unions)
         newone._updates = copy(self._updates)
         return newone
 
